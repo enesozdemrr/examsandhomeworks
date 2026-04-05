@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sınıf Notları</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fafaf8;
+  --surface:#ffffff;
+  --border:#e8e6e0;
+  --border-strong:#ccc9c0;
+  --text:#1a1916;
+  --text-muted:#6b6860;
+  --text-faint:#a8a59e;
+  --accent:#2d4a3e;
+  --accent-light:#e8f0ed;
+  --tag-bg:#f0ede6;
+  --danger:#c0392b;
+  --danger-bg:#fdf0ee;
+  --shadow:0 1px 3px rgba(0,0,0,0.06);
+}
+@media(prefers-color-scheme:dark){
+:root{
+  --bg:#141412;
+  --surface:#1e1d1a;
+  --border:#2e2c28;
+  --border-strong:#3e3c38;
+  --text:#f0ede6;
+  --text-muted:#9e9b94;
+  --text-faint:#5e5c58;
+  --accent:#6aab8e;
+  --accent-light:#1a2e24;
+  --tag-bg:#2a2820;
+  --danger:#e05c4e;
+  --danger-bg:#2a1a18;
+  --shadow:0 1px 3px rgba(0,0,0,0.3);
+}}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+header{border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:100}
+.logo{font-family:'DM Serif Display',serif;font-size:1.25rem;letter-spacing:-0.01em;color:var(--text)}
+.logo span{color:var(--accent)}
+.layout{display:flex;flex:1;min-height:calc(100vh - 56px)}
+aside{width:220px;border-right:1px solid var(--border);background:var(--surface);padding:1.25rem 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;flex-shrink:0}
+.aside-label{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);padding:0 1.25rem;margin-bottom:0.5rem;font-weight:500}
+.subject-btn{display:block;width:100%;text-align:left;padding:0.5rem 1.25rem;font-size:13px;font-family:'DM Sans',sans-serif;background:none;border:none;cursor:pointer;color:var(--text-muted);border-left:2px solid transparent;transition:all 0.15s;line-height:1.4}
+.subject-btn:hover{color:var(--text);background:var(--accent-light)}
+.subject-btn.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-light);font-weight:500}
+.subject-btn .count{float:right;font-size:11px;color:var(--text-faint);background:var(--tag-bg);padding:1px 6px;border-radius:10px}
+main{flex:1;padding:2rem;max-width:860px}
+.main-header{margin-bottom:1.75rem;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem}
+.main-title{font-family:'DM Serif Display',serif;font-size:1.75rem;color:var(--text)}
+.main-subtitle{font-size:13px;color:var(--text-faint);margin-top:2px}
+.btn-add{display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1rem;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;letter-spacing:0.01em;white-space:nowrap;transition:opacity 0.15s}
+.btn-add:hover{opacity:0.88}
+.notes-grid{display:flex;flex-direction:column;gap:1px;background:var(--border)}
+.note-card{background:var(--surface);padding:1.25rem 1.5rem;position:relative;transition:background 0.15s}
+.note-card:hover{background:var(--accent-light)}
+.note-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:0.5rem}
+.note-title{font-size:15px;font-weight:500;color:var(--text);line-height:1.4}
+.note-meta{font-size:12px;color:var(--text-faint);margin-bottom:0.75rem;display:flex;gap:0.75rem}
+.note-meta b{color:var(--text-muted);font-weight:400}
+.note-body{font-size:14px;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.note-del{background:none;border:none;cursor:pointer;color:var(--text-faint);font-size:13px;padding:2px 6px;border-radius:4px;flex-shrink:0;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.note-del:hover{color:var(--danger);background:var(--danger-bg)}
+.empty{text-align:center;padding:4rem 2rem;color:var(--text-faint)}
+.empty-icon{font-size:2rem;margin-bottom:1rem;opacity:0.4}
+.empty p{font-size:14px;line-height:1.6}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.75rem;width:100%;max-width:520px;box-shadow:0 8px 40px rgba(0,0,0,0.12)}
+.modal h2{font-family:'DM Serif Display',serif;font-size:1.25rem;margin-bottom:1.25rem;color:var(--text)}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:5px;font-weight:500;letter-spacing:0.02em}
+.field input,.field textarea,.field select{width:100%;padding:0.6rem 0.75rem;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;transition:border 0.15s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+.field textarea{resize:vertical;min-height:120px;line-height:1.6}
+.modal-actions{display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.25rem}
+.btn-cancel{background:none;border:1px solid var(--border);padding:0.5rem 1rem;border-radius:6px;font-size:13px;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.btn-cancel:hover{border-color:var(--border-strong);color:var(--text)}
+.search-bar{padding:0 1.25rem;margin-bottom:1rem}
+.search-bar input{width:100%;padding:0.45rem 0.75rem;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);color:var(--text);outline:none}
+.search-bar input:focus{border-color:var(--accent)}
+@media(max-width:600px){
+  aside{width:180px}
+  main{padding:1.25rem}
+  .main-title{font-size:1.35rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">sınıf<span>notları</span></div>
+  <div style="font-size:12px;color:var(--text-faint)" id="total-badge"></div>
+</header>
+
+<div class="layout">
+  <aside id="sidebar"></aside>
+  <main id="main"></main>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>Yeni Not Ekle</h2>
+    <div class="field">
+      <label>DERS</label>
+      <select id="f-subject"></select>
+    </div>
+    <div class="field">
+      <label>BAŞLIK</label>
+      <input id="f-title" type="text" placeholder="Notun başlığı...">
+    </div>
+    <div class="field">
+      <label>İSMİN</label>
+      <input id="f-author" type="text" placeholder="Adın soyadın...">
+    </div>
+    <div class="field">
+      <label>NOT İÇERİĞİ</label>
+      <textarea id="f-body" placeholder="Notunu buraya yaz..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">İptal</button>
+      <button class="btn-add" onclick="saveNote()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUBJECTS=[
+  "Biyoloji","Coğrafya","Din Kültürü ve Ahlak Bilgisi","Felsefe",
+  "Fizik","Gaz Türbinli Motorlar","İngilizce","Kimya",
+  "Matematik","Tarih","Türk Dili ve Edebiyatı",
+  "Uçak Elektrik Sistemleri","Elektrik"
+];
+
+let notes=[];
+let activeSubject=SUBJECTS[0];
+let search="";
+
+async function loadNotes(){
+  try{
+    const r=await window.storage.get("sinif_notlari",true);
+    if(r&&r.value) notes=JSON.parse(r.value);
+  }catch(e){notes=[];}
+  render();
+}
+
+async function saveNotes(){
+  try{await window.storage.set("sinif_notlari",JSON.stringify(notes),true);}catch(e){}
+}
+
+function render(){
+  renderSidebar();
+  renderMain();
+  const total=notes.length;
+  document.getElementById("total-badge").textContent=total===0?"":total+" not";
+}
+
+function renderSidebar(){
+  const el=document.getElementById("sidebar");
+  let html=`<div class="search-bar"><input placeholder="Ders ara..." oninput="filterSearch(this.value)"></div>`;
+  html+=`<div class="aside-label">Dersler</div>`;
+  SUBJECTS.forEach(s=>{
+    const c=notes.filter(n=>n.subject===s).length;
+    const badge=c>0?`<span class="count">${c}</span>`:"";
+    html+=`<button class="subject-btn${s===activeSubject?" active":""}" onclick="setSubject('${s.replace(/'/g,"\\'")}')">
+      ${s}${badge}
+    </button>`;
+  });
+  el.innerHTML=html;
+}
+
+function filterSearch(v){
+  search=v.toLowerCase();
+  renderSidebar();
+}
+
+function setSubject(s){activeSubject=s;render();}
+
+function renderMain(){
+  const el=document.getElementById("main");
+  const subjectNotes=notes
+    .filter(n=>n.subject===activeSubject)
+    .filter(n=>!search||n.title.toLowerCase().includes(search)||n.body.toLowerCase().includes(search)||n.author.toLowerCase().includes(search))
+    .sort((a,b)=>b.ts-a.ts);
+
+  let html=`<div class="main-header">
+    <div>
+      <div class="main-title">${activeSubject}</div>
+      <div class="main-subtitle">${subjectNotes.length} not</div>
+    </div>
+    <button class="btn-add" onclick="openModal()">+ Not Ekle</button>
+  </div>`;
+
+  if(subjectNotes.length===0){
+    html+=`<div class="empty">
+      <div class="empty-icon">📄</div>
+      <p>Bu ders için henüz not eklenmemiş.<br>İlk notu sen ekle!</p>
+    </div>`;
+  } else {
+    html+=`<div class="notes-grid">`;
+    subjectNotes.forEach(n=>{
+      const d=new Date(n.ts);
+      const date=`${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;
+      const time=`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+      html+=`<div class="note-card">
+        <div class="note-top">
+          <div class="note-title">${esc(n.title)}</div>
+          <button class="note-del" onclick="deleteNote('${n.id}')">sil</button>
+        </div>
+        <div class="note-meta">
+          <b>${esc(n.author)}</b>
+          <span>${date} · ${time}</span>
+        </div>
+        <div class="note-body">${esc(n.body)}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  el.innerHTML=html;
+}
+
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function openModal(){
+  const sel=document.getElementById("f-subject");
+  sel.innerHTML=SUBJECTS.map(s=>`<option value="${s}"${s===activeSubject?" selected":""}>${s}</option>`).join("");
+  document.getElementById("overlay").classList.add("open");
+  document.getElementById("f-title").focus();
+}
+
+function closeModal(){
+  document.getElementById("overlay").classList.remove("open");
+}
+
+function saveNote(){
+  const subject=document.getElementById("f-subject").value;
+  const title=document.getElementById("f-title").value.trim();
+  const author=document.getElementById("f-author").value.trim();
+  const body=document.getElementById("f-body").value.trim();
+
+  if(!title){alert("Lütfen bir başlık gir.");return;}
+  if(!author){alert("Lütfen isminizi gir.");return;}
+  if(!body){alert("Lütfen not içeriği yaz.");return;}
+
+  const note={id:Date.now()+"_"+Math.random().toString(36).slice(2),subject,title,author,body,ts:Date.now()};
+  notes.push(note);
+  saveNotes();
+  activeSubject=subject;
+
+  document.getElementById("f-title").value="";
+  document.getElementById("f-body").value="";
+  closeModal();
+  render();
+}
+
+function deleteNote(id){
+  if(!confirm("Bu notu silmek istediğinden emin misin?"))return;
+  notes=notes.filter(n=>n.id!==id);
+  saveNotes();
+  render();
+}
+
+document.getElementById("overlay").addEventListener("click",function(e){
+  if(e.target===this)closeModal();
+});
+
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+
+loadNotes();
+</script>
+</body>
+</html>
