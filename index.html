@@ -5,272 +5,766 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sınıf Notları</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#fafaf8;
-  --surface:#ffffff;
-  --border:#e8e6e0;
-  --border-strong:#ccc9c0;
-  --text:#1a1916;
-  --text-muted:#6b6860;
-  --text-faint:#a8a59e;
-  --accent:#2d4a3e;
-  --accent-light:#e8f0ed;
-  --tag-bg:#f0ede6;
-  --danger:#c0392b;
-  --danger-bg:#fdf0ee;
-  --shadow:0 1px 3px rgba(0,0,0,0.06);
+  --bg:#fafaf8;--surface:#fff;--surface2:#f5f3ee;
+  --border:#e8e6e0;--border2:#ccc9c0;
+  --text:#1a1916;--muted:#6b6860;--faint:#a8a59e;
+  --accent:#2d4a3e;--accent-l:#e8f0ed;
+  --tag:#f0ede6;
+  --danger:#c0392b;--danger-bg:#fdf0ee;
+  --like:#e07b54;--like-bg:#fdf1ec;
+  --exam-c:#7c3aed;--exam-bg:#f5f3ff;
+  --hw-c:#0369a1;--hw-bg:#eff6ff;
+  --shadow:0 2px 16px rgba(0,0,0,0.08);
 }
-@media(prefers-color-scheme:dark){
-:root{
-  --bg:#141412;
-  --surface:#1e1d1a;
-  --border:#2e2c28;
-  --border-strong:#3e3c38;
-  --text:#f0ede6;
-  --text-muted:#9e9b94;
-  --text-faint:#5e5c58;
-  --accent:#6aab8e;
-  --accent-light:#1a2e24;
-  --tag-bg:#2a2820;
-  --danger:#e05c4e;
-  --danger-bg:#2a1a18;
-  --shadow:0 1px 3px rgba(0,0,0,0.3);
-}}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
-header{border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:100}
-.logo{font-family:'DM Serif Display',serif;font-size:1.25rem;letter-spacing:-0.01em;color:var(--text)}
+.dark{
+  --bg:#111110;--surface:#1a1917;--surface2:#222120;
+  --border:#2a2926;--border2:#3a3835;
+  --text:#f0ede6;--muted:#9e9b94;--faint:#5a5855;
+  --accent:#6aab8e;--accent-l:#162418;
+  --tag:#252320;
+  --danger:#e05c4e;--danger-bg:#2a1614;
+  --like:#e07b54;--like-bg:#2a1a12;
+  --exam-c:#a78bfa;--exam-bg:#1e1a2e;
+  --hw-c:#60a5fa;--hw-bg:#1e2a3a;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;transition:background .2s,color .2s}
+
+/* ── HEADER ── */
+header{border-bottom:1px solid var(--border);padding:0 1.5rem;height:54px;display:flex;align-items:center;gap:1rem;background:var(--surface);position:sticky;top:0;z-index:100}
+.logo{font-family:'DM Serif Display',serif;font-size:1.15rem;color:var(--text);flex-shrink:0}
 .logo span{color:var(--accent)}
-.layout{display:flex;flex:1;min-height:calc(100vh - 56px)}
-aside{width:220px;border-right:1px solid var(--border);background:var(--surface);padding:1.25rem 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;flex-shrink:0}
-.aside-label{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);padding:0 1.25rem;margin-bottom:0.5rem;font-weight:500}
-.subject-btn{display:block;width:100%;text-align:left;padding:0.5rem 1.25rem;font-size:13px;font-family:'DM Sans',sans-serif;background:none;border:none;cursor:pointer;color:var(--text-muted);border-left:2px solid transparent;transition:all 0.15s;line-height:1.4}
-.subject-btn:hover{color:var(--text);background:var(--accent-light)}
-.subject-btn.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-light);font-weight:500}
-.subject-btn .count{float:right;font-size:11px;color:var(--text-faint);background:var(--tag-bg);padding:1px 6px;border-radius:10px}
-main{flex:1;padding:2rem;max-width:860px}
-.main-header{margin-bottom:1.75rem;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem}
-.main-title{font-family:'DM Serif Display',serif;font-size:1.75rem;color:var(--text)}
-.main-subtitle{font-size:13px;color:var(--text-faint);margin-top:2px}
-.btn-add{display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1rem;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;letter-spacing:0.01em;white-space:nowrap;transition:opacity 0.15s}
-.btn-add:hover{opacity:0.88}
-.notes-grid{display:flex;flex-direction:column;gap:1px;background:var(--border)}
-.note-card{background:var(--surface);padding:1.25rem 1.5rem;position:relative;transition:background 0.15s}
-.note-card:hover{background:var(--accent-light)}
-.note-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:0.5rem}
-.note-title{font-size:15px;font-weight:500;color:var(--text);line-height:1.4}
-.note-meta{font-size:12px;color:var(--text-faint);margin-bottom:0.75rem;display:flex;gap:0.75rem}
-.note-meta b{color:var(--text-muted);font-weight:400}
-.note-body{font-size:14px;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;word-break:break-word}
-.note-del{background:none;border:none;cursor:pointer;color:var(--text-faint);font-size:13px;padding:2px 6px;border-radius:4px;flex-shrink:0;font-family:'DM Sans',sans-serif;transition:all 0.15s}
-.note-del:hover{color:var(--danger);background:var(--danger-bg)}
-.empty{text-align:center;padding:4rem 2rem;color:var(--text-faint)}
-.empty-icon{font-size:2rem;margin-bottom:1rem;opacity:0.4}
-.empty p{font-size:14px;line-height:1.6}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.g-search{flex:1;max-width:340px;position:relative}
+.g-search input{width:100%;padding:.45rem .75rem .45rem 2rem;border:1px solid var(--border);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface2);color:var(--text);outline:none;transition:border .15s}
+.g-search input:focus{border-color:var(--accent)}
+.g-search-ico{position:absolute;left:.65rem;top:50%;transform:translateY(-50%);color:var(--faint);font-size:14px;pointer-events:none}
+.hbtns{margin-left:auto;display:flex;align-items:center;gap:6px}
+.hbtn{background:none;border:1px solid var(--border);padding:.32rem .65rem;border-radius:6px;font-size:12px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap}
+.hbtn:hover{border-color:var(--border2);color:var(--text)}
+.hbtn.accent{background:var(--accent);color:#fff;border-color:var(--accent)}
+.hbtn.accent:hover{opacity:.88}
+.user-chip{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+.user-dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1}
+aside{width:210px;border-right:1px solid var(--border);background:var(--surface);padding:1rem 0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;flex-shrink:0}
+main{flex:1;padding:1.75rem 2rem;min-width:0}
+
+/* ── SIDEBAR ── */
+.a-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);padding:0 1.1rem;margin-bottom:.35rem;font-weight:500}
+.a-sep{height:1px;background:var(--border);margin:1rem 0}
+.nbtn{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:.42rem 1.1rem;font-size:13px;font-family:'DM Sans',sans-serif;background:none;border:none;cursor:pointer;color:var(--muted);border-left:2.5px solid transparent;transition:all .12s;line-height:1.4}
+.nbtn:hover{color:var(--text);background:var(--accent-l)}
+.nbtn.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-l);font-weight:500}
+.nbtn.exam-nb.active{color:var(--exam-c);border-left-color:var(--exam-c)}
+.nbtn.hw-nb.active{color:var(--hw-c);border-left-color:var(--hw-c)}
+.nbtn .cnt{font-size:11px;color:var(--faint);background:var(--tag);padding:1px 6px;border-radius:10px}
+
+/* ── MAIN HEADER ── */
+.mhead{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.5rem}
+.mtitle{font-family:'DM Serif Display',serif;font-size:1.55rem}
+.msub{font-size:12px;color:var(--faint);margin-top:3px}
+
+/* ── NOTE CARDS ── */
+.notes-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border-radius:8px;overflow:hidden}
+.note-card{background:var(--surface);padding:1.1rem 1.4rem;cursor:pointer;transition:background .12s}
+.note-card:hover{background:var(--accent-l)}
+.nc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:3px}
+.nc-title{font-size:14px;font-weight:500;line-height:1.4}
+.nc-tag{font-size:11px;color:var(--accent);background:var(--accent-l);padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0}
+.nc-meta{font-size:12px;color:var(--faint);margin-bottom:6px;display:flex;gap:8px;flex-wrap:wrap}
+.nc-preview{font-size:13px;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nc-foot{display:flex;align-items:center;gap:8px;margin-top:8px}
+.foot-btn{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--faint);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:3px 6px;border-radius:4px;transition:all .12s}
+.foot-btn:hover{background:var(--tag)}
+.foot-btn.liked{color:var(--like)}
+.img-badge{font-size:11px;color:var(--faint);margin-left:auto;background:var(--tag);padding:2px 7px;border-radius:10px}
+
+/* ── EXAM / HW CARDS ── */
+.event-grid{display:flex;flex-direction:column;gap:10px}
+.event-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.9rem 1.1rem;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.event-card.exam-card{border-left:3px solid var(--exam-c)}
+.event-card.hw-card{border-left:3px solid var(--hw-c)}
+.event-type{font-size:11px;font-weight:500;margin-bottom:2px}
+.event-type.exam-t{color:var(--exam-c)}
+.event-type.hw-t{color:var(--hw-c)}
+.event-desc{font-size:14px;font-weight:500;color:var(--text)}
+.event-date{font-size:12px;color:var(--faint);margin-top:3px}
+.event-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.event-countdown{font-size:13px;font-weight:500;white-space:nowrap}
+.cnt-exam{color:var(--exam-c)}
+.cnt-hw{color:var(--hw-c)}
+.cnt-late{color:var(--danger)}
+.event-del{background:none;border:none;cursor:pointer;color:var(--faint);font-size:12px;font-family:'DM Sans',sans-serif;padding:2px 6px;border-radius:4px;transition:all .12s}
+.event-del:hover{color:var(--danger);background:var(--danger-bg)}
+.hw-done{background:none;border:1px solid var(--border);color:var(--muted);font-size:12px;padding:2px 8px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s}
+.hw-done.done-yes{background:var(--accent-l);color:var(--accent);border-color:var(--accent)}
+.event-past{opacity:.4}
+.section-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem}
+.filter-pill{font-size:12px;padding:.3rem .75rem;border-radius:20px;border:1px solid var(--border);cursor:pointer;background:var(--surface);color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .12s}
+.filter-pill:hover{border-color:var(--border2);color:var(--text)}
+.filter-pill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:4rem 2rem;color:var(--faint)}
+.empty-ico{font-size:2.5rem;margin-bottom:1rem;opacity:.3}
+.empty p{font-size:14px;line-height:1.7}
+
+/* ── OVERLAYS ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:1rem}
 .overlay.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.75rem;width:100%;max-width:520px;box-shadow:0 8px 40px rgba(0,0,0,0.12)}
-.modal h2{font-family:'DM Serif Display',serif;font-size:1.25rem;margin-bottom:1.25rem;color:var(--text)}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.6rem;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal.wide{max-width:680px}
+.modal h2{font-family:'DM Serif Display',serif;font-size:1.2rem;margin-bottom:1.25rem}
 .field{margin-bottom:1rem}
-.field label{display:block;font-size:12px;color:var(--text-muted);margin-bottom:5px;font-weight:500;letter-spacing:0.02em}
-.field input,.field textarea,.field select{width:100%;padding:0.6rem 0.75rem;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;transition:border 0.15s}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.field input,.field textarea,.field select{width:100%;padding:.55rem .75rem;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;transition:border .15s}
 .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
-.field textarea{resize:vertical;min-height:120px;line-height:1.6}
-.modal-actions{display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.25rem}
-.btn-cancel{background:none;border:1px solid var(--border);padding:0.5rem 1rem;border-radius:6px;font-size:13px;cursor:pointer;color:var(--text-muted);font-family:'DM Sans',sans-serif;transition:all 0.15s}
-.btn-cancel:hover{border-color:var(--border-strong);color:var(--text)}
-.search-bar{padding:0 1.25rem;margin-bottom:1rem}
-.search-bar input{width:100%;padding:0.45rem 0.75rem;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);color:var(--text);outline:none}
-.search-bar input:focus{border-color:var(--accent)}
-@media(max-width:600px){
-  aside{width:180px}
-  main{padding:1.25rem}
-  .main-title{font-size:1.35rem}
-}
+.field textarea{resize:vertical;min-height:110px;line-height:1.7}
+.mactions{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.25rem}
+.btn-cancel{background:none;border:1px solid var(--border);padding:.45rem .9rem;border-radius:7px;font-size:13px;cursor:pointer;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .15s}
+.btn-cancel:hover{border-color:var(--border2);color:var(--text)}
+.btn-ok{background:var(--accent);color:#fff;border:none;padding:.45rem 1rem;border-radius:7px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:opacity .15s}
+.btn-ok:hover{opacity:.88}
+
+/* ── NOTE DETAIL ── */
+.det-subject{font-size:12px;color:var(--accent);font-weight:500;margin-bottom:5px}
+.det-title{font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:8px}
+.det-meta{font-size:12px;color:var(--faint);margin-bottom:14px;display:flex;gap:10px;flex-wrap:wrap}
+.det-img{width:100%;border-radius:8px;margin-bottom:14px;border:1px solid var(--border);max-height:380px;object-fit:contain;background:var(--surface2)}
+.det-body{font-size:14px;color:var(--muted);line-height:1.85;white-space:pre-wrap;word-break:break-word;margin-bottom:1.25rem}
+.det-actions{display:flex;gap:7px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:1.25rem;flex-wrap:wrap}
+.dact{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--muted);background:none;border:1px solid var(--border);cursor:pointer;font-family:'DM Sans',sans-serif;padding:.38rem .8rem;border-radius:6px;transition:all .12s}
+.dact:hover{border-color:var(--border2);color:var(--text)}
+.dact.liked{color:var(--like);border-color:var(--like);background:var(--like-bg)}
+.dact.del-act{color:var(--danger);border-color:var(--danger)}
+.dact.del-act:hover{background:var(--danger-bg)}
+
+/* ── COMMENTS ── */
+.cmt-title{font-size:13px;font-weight:500;color:var(--muted);margin-bottom:10px}
+.cmt{border-left:2px solid var(--border);padding:.45rem .75rem;margin-bottom:7px}
+.cmt-author{font-size:12px;font-weight:500;color:var(--text)}
+.cmt-time{font-size:11px;color:var(--faint);margin-left:6px;font-weight:400}
+.cmt-body{font-size:13px;color:var(--muted);line-height:1.6;margin-top:2px}
+.cmt-form{display:flex;gap:7px;margin-top:10px}
+.cmt-form input{flex:1;padding:.42rem .7rem;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);color:var(--text);outline:none}
+.cmt-form input:focus{border-color:var(--accent)}
+
+/* ── IMG UPLOAD ── */
+.img-zone{border:1.5px dashed var(--border);border-radius:8px;padding:1rem;text-align:center;cursor:pointer;transition:all .15s;font-size:13px;color:var(--faint)}
+.img-zone:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-l)}
+.img-thumb{width:100%;max-height:160px;object-fit:contain;border-radius:6px;margin-top:8px;border:1px solid var(--border)}
+.img-rm{font-size:12px;color:var(--danger);cursor:pointer;margin-top:4px;background:none;border:none;font-family:'DM Sans',sans-serif}
+
+/* ── LOGIN ── */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:2.5rem 2rem;width:100%;max-width:360px;box-shadow:var(--shadow)}
+.login-logo{font-family:'DM Serif Display',serif;font-size:1.5rem;text-align:center;margin-bottom:4px}
+.login-logo span{color:var(--accent)}
+.login-sub{text-align:center;font-size:13px;color:var(--faint);margin-bottom:1.75rem}
+.err{font-size:12px;color:var(--danger);background:var(--danger-bg);padding:.5rem .75rem;border-radius:6px;margin-bottom:.75rem;display:none}
+.err.show{display:block}
+
+@media(max-width:640px){aside{display:none}main{padding:1rem}}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">sınıf<span>notları</span></div>
-  <div style="font-size:12px;color:var(--text-faint)" id="total-badge"></div>
-</header>
-
-<div class="layout">
-  <aside id="sidebar"></aside>
-  <main id="main"></main>
+<!-- APP -->
+<div id="app" style="display:none">
+  <header>
+    <div class="logo">sınıf<span>notları</span></div>
+    <div class="g-search">
+      <span class="g-search-ico">⌕</span>
+      <input type="text" placeholder="Tüm notlarda ara..." id="g-search-inp" oninput="doSearch(this.value)">
+    </div>
+    <div class="hbtns">
+      <button class="hbtn" onclick="toggleDark()" id="theme-btn">🌙</button>
+      <button class="hbtn accent" onclick="openNoteModal()">+ Not Ekle</button>
+      <div class="user-chip"><div class="user-dot"></div><span id="uname-chip"></span></div>
+      <button class="hbtn" onclick="doLogout()">↩ Çıkış</button>
+    </div>
+  </header>
+  <div class="layout">
+    <aside id="sidebar"></aside>
+    <main id="main"></main>
+  </div>
 </div>
 
-<div class="overlay" id="overlay">
+<!-- LOGIN -->
+<div id="login-screen" class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">sınıf<span>notları</span></div>
+    <div class="login-sub" id="login-sub">Sınıf platformuna giriş yap</div>
+    <div class="err" id="login-err"></div>
+    <div id="login-body"></div>
+  </div>
+</div>
+
+<!-- NOTE MODAL -->
+<div class="overlay" id="note-overlay">
   <div class="modal">
     <h2>Yeni Not Ekle</h2>
+    <div class="field"><label>Ders</label><select id="f-subject"></select></div>
+    <div class="field"><label>Başlık</label><input id="f-title" type="text" placeholder="Notun başlığı..."></div>
+    <div class="field"><label>İçerik</label><textarea id="f-body" placeholder="Notunu buraya yaz..."></textarea></div>
     <div class="field">
-      <label>DERS</label>
-      <select id="f-subject"></select>
+      <label>Fotoğraf (isteğe bağlı)</label>
+      <div class="img-zone" id="img-zone" onclick="document.getElementById('img-inp').click()">📎 Fotoğraf ekle</div>
+      <input type="file" id="img-inp" accept="image/*" style="display:none" onchange="handleImg(this)">
+      <img id="img-thumb" class="img-thumb" style="display:none">
+      <button class="img-rm" id="img-rm" style="display:none" onclick="rmImg()">✕ Kaldır</button>
     </div>
-    <div class="field">
-      <label>BAŞLIK</label>
-      <input id="f-title" type="text" placeholder="Notun başlığı...">
+    <div class="mactions">
+      <button class="btn-cancel" onclick="closeNoteModal()">İptal</button>
+      <button class="btn-ok" onclick="saveNote()">Kaydet</button>
     </div>
-    <div class="field">
-      <label>İSMİN</label>
-      <input id="f-author" type="text" placeholder="Adın soyadın...">
+  </div>
+</div>
+
+<!-- EXAM MODAL -->
+<div class="overlay" id="exam-overlay">
+  <div class="modal">
+    <h2>📅 Sınav Ekle</h2>
+    <div class="field"><label>Ders</label><select id="ef-subject"></select></div>
+    <div class="field"><label>Açıklama</label><input id="ef-desc" type="text" placeholder="Vize, Final, Quiz..."></div>
+    <div class="field"><label>Tarih</label><input id="ef-date" type="date"></div>
+    <div class="mactions">
+      <button class="btn-cancel" onclick="closeModal('exam-overlay')">İptal</button>
+      <button class="btn-ok" onclick="saveExam()">Kaydet</button>
     </div>
-    <div class="field">
-      <label>NOT İÇERİĞİ</label>
-      <textarea id="f-body" placeholder="Notunu buraya yaz..."></textarea>
+  </div>
+</div>
+
+<!-- HW MODAL -->
+<div class="overlay" id="hw-overlay">
+  <div class="modal">
+    <h2>📝 Ödev Ekle</h2>
+    <div class="field"><label>Ders</label><select id="hf-subject"></select></div>
+    <div class="field"><label>Ödev Başlığı</label><input id="hf-title" type="text" placeholder="Ödevin başlığı..."></div>
+    <div class="field"><label>Açıklama (isteğe bağlı)</label><textarea id="hf-desc" placeholder="Ödev detayları..." style="min-height:70px"></textarea></div>
+    <div class="field"><label>Son Teslim Tarihi</label><input id="hf-date" type="date"></div>
+    <div class="mactions">
+      <button class="btn-cancel" onclick="closeModal('hw-overlay')">İptal</button>
+      <button class="btn-ok" onclick="saveHw()">Kaydet</button>
     </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">İptal</button>
-      <button class="btn-add" onclick="saveNote()">Kaydet</button>
+  </div>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div class="overlay" id="detail-overlay">
+  <div class="modal wide">
+    <div id="det-content"></div>
+    <div class="det-actions" id="det-actions"></div>
+    <div id="det-comments"></div>
+    <div class="mactions" style="margin-top:.75rem">
+      <button class="btn-cancel" onclick="closeModal('detail-overlay')">Kapat</button>
     </div>
   </div>
 </div>
 
 <script>
-const SUBJECTS=[
-  "Biyoloji","Coğrafya","Din Kültürü ve Ahlak Bilgisi","Felsefe",
-  "Fizik","Gaz Türbinli Motorlar","İngilizce","Kimya",
-  "Matematik","Tarih","Türk Dili ve Edebiyatı",
-  "Uçak Elektrik Sistemleri","Elektrik"
-];
+const SUBJECTS=["Biyoloji","Coğrafya","Din Kültürü ve Ahlak Bilgisi","Felsefe","Fizik","Gaz Türbinli Motorlar","İngilizce","Kimya","Matematik","Tarih","Türk Dili ve Edebiyatı","Uçak Elektrik Sistemleri","Elektrik"];
+const CLASS_PASS="sinif2025";
 
-let notes=[];
-let activeSubject=SUBJECTS[0];
-let search="";
+let notes=[],exams=[],homeworks=[],currentUser=null,activeSubject=SUBJECTS[0],activeView="notes",searchQ="",pendingImg=null,hwFilter="all";
 
-async function loadNotes(){
-  try{
-    const r=await window.storage.get("sinif_notlari",true);
-    if(r&&r.value) notes=JSON.parse(r.value);
-  }catch(e){notes=[];}
+/* ── STORAGE ── */
+async function sg(k){try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null;}catch(e){return null;}}
+async function ss(k,v){try{await window.storage.set(k,JSON.stringify(v),true);}catch(e){}}
+
+/* ── INIT ── */
+async function init(){
+  const dm=localStorage.getItem("dm");
+  if(dm==="1")document.body.classList.add("dark");
+  updateThemeBtn();
+  const u=await sg("current_user");
+  if(u){currentUser=u;await loadData();showApp();}
+  else showLogin();
+}
+
+async function loadData(){
+  notes=await sg("notes")||[];
+  exams=await sg("exams")||[];
+  homeworks=await sg("homeworks")||[];
+}
+
+/* ── LOGIN ── */
+function showLogin(){
+  document.getElementById("login-screen").style.display="flex";
+  document.getElementById("app").style.display="none";
+  renderLogin();
+}
+
+function renderLogin(){
+  document.getElementById("login-body").innerHTML=`
+    <div class="field"><label style="font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:5px">İsmin</label>
+      <input id="li-name" type="text" placeholder="Adın soyadın..." style="width:100%;padding:.55rem .75rem;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;transition:border .15s"></div>
+    <div class="field" style="margin-top:.75rem"><label style="font-size:11px;color:var(--muted);font-weight:500;letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:5px">Sınıf Şifresi</label>
+      <input id="li-pass" type="password" placeholder="Şifre..." style="width:100%;padding:.55rem .75rem;border:1px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--bg);color:var(--text);outline:none;transition:border .15s" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div style="font-size:12px;color:var(--faint);margin-top:.5rem;margin-bottom:1.25rem">Şifre: <b style="color:var(--muted)">${CLASS_PASS}</b></div>
+    <button onclick="doLogin()" style="width:100%;padding:.6rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer">Giriş Yap</button>`;
+}
+
+async function doLogin(){
+  const name=document.getElementById("li-name").value.trim();
+  const pass=document.getElementById("li-pass").value;
+  const err=document.getElementById("login-err");
+  if(!name){showErr("İsmini gir.");return;}
+  if(pass!==CLASS_PASS){showErr("Şifre yanlış.");return;}
+  currentUser=name;
+  await ss("current_user",name);
+  err.classList.remove("show");
+  await loadData();
+  showApp();
+}
+
+function showErr(m){const e=document.getElementById("login-err");e.textContent=m;e.classList.add("show");}
+
+async function doLogout(){
+  if(!confirm("Çıkış yapmak istediğinden emin misin?"))return;
+  await ss("current_user",null);
+  currentUser=null;
+  showLogin();
+}
+
+/* ── APP ── */
+function showApp(){
+  document.getElementById("login-screen").style.display="none";
+  const app=document.getElementById("app");
+  app.style.display="flex";
+  app.style.flexDirection="column";
+  app.style.minHeight="100vh";
+  document.getElementById("uname-chip").textContent=currentUser;
   render();
 }
 
-async function saveNotes(){
-  try{await window.storage.set("sinif_notlari",JSON.stringify(notes),true);}catch(e){}
-}
-
-function render(){
-  renderSidebar();
-  renderMain();
-  const total=notes.length;
-  document.getElementById("total-badge").textContent=total===0?"":total+" not";
-}
+/* ── RENDER ── */
+function render(){renderSidebar();renderMain();}
 
 function renderSidebar(){
   const el=document.getElementById("sidebar");
-  let html=`<div class="search-bar"><input placeholder="Ders ara..." oninput="filterSearch(this.value)"></div>`;
-  html+=`<div class="aside-label">Dersler</div>`;
+  let h=`<div style="padding:0 1.1rem;margin-bottom:.75rem"><input type="text" placeholder="Ders ara..." style="width:100%;padding:.4rem .65rem;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--bg);color:var(--text);outline:none" oninput="sideSearch(this.value)"></div>`;
+  h+=`<div class="a-label">Özel</div>`;
+  h+=navBtn("📅 Sınavlar","exams",`exam-nb`,examBadge());
+  h+=navBtn("📝 Ödevler","homeworks",`hw-nb`,hwBadge());
+  h+=`<div class="a-sep"></div><div class="a-label">Dersler</div>`;
   SUBJECTS.forEach(s=>{
-    const c=notes.filter(n=>n.subject===s).length;
-    const badge=c>0?`<span class="count">${c}</span>`:"";
-    html+=`<button class="subject-btn${s===activeSubject?" active":""}" onclick="setSubject('${s.replace(/'/g,"\\'")}')">
-      ${s}${badge}
-    </button>`;
+    const cnt=notes.filter(n=>n.subject===s).length;
+    h+=navBtn(s,"notes","",(cnt>0?cnt:""),s);
   });
-  el.innerHTML=html;
+  el.innerHTML=h;
 }
 
-function filterSearch(v){
-  search=v.toLowerCase();
-  renderSidebar();
+function navBtn(label,v,cls,cnt,subj){
+  let active=false;
+  if(v==="exams"&&activeView==="exams")active=true;
+  else if(v==="homeworks"&&activeView==="homeworks")active=true;
+  else if(v==="notes"&&activeView==="notes"&&subj===activeSubject)active=true;
+  const badge=cnt?`<span class="cnt">${cnt}</span>`:"";
+  return `<button class="nbtn ${cls}${active?" active":""}" onclick="${v==='notes'?`setSubject('${subj.replace(/'/g,"\\'")}')`:`setView('${v}')`}">${label}${badge}</button>`;
 }
 
-function setSubject(s){activeSubject=s;render();}
+function examBadge(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const upcoming=exams.filter(e=>new Date(e.date)>=today).length;
+  return upcoming>0?upcoming:"";
+}
+
+function hwBadge(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const pending=homeworks.filter(h=>!h.doneBy?.includes(currentUser)&&new Date(h.date)>=today).length;
+  return pending>0?pending:"";
+}
+
+function setSubject(s){activeSubject=s;activeView="notes";searchQ="";document.getElementById("g-search-inp").value="";render();}
+function setView(v){activeView=v;searchQ="";document.getElementById("g-search-inp").value="";render();}
+
+function sideSearch(q){
+  // filter subjects in sidebar live
+  const btns=document.querySelectorAll(".nbtn");
+  btns.forEach(b=>{
+    if(!q){b.style.display="";return;}
+    b.style.display=b.textContent.toLowerCase().includes(q.toLowerCase())?"":"none";
+  });
+}
 
 function renderMain(){
+  if(activeView==="exams"){renderExams();return;}
+  if(activeView==="homeworks"){renderHomeworks();return;}
+  renderNotes();
+}
+
+/* ── NOTES VIEW ── */
+function renderNotes(){
   const el=document.getElementById("main");
-  const subjectNotes=notes
-    .filter(n=>n.subject===activeSubject)
-    .filter(n=>!search||n.title.toLowerCase().includes(search)||n.body.toLowerCase().includes(search)||n.author.toLowerCase().includes(search))
-    .sort((a,b)=>b.ts-a.ts);
+  let list=notes.filter(n=>{
+    if(searchQ)return n.title.toLowerCase().includes(searchQ)||n.body.toLowerCase().includes(searchQ)||n.subject.toLowerCase().includes(searchQ)||n.author.toLowerCase().includes(searchQ);
+    return n.subject===activeSubject;
+  }).sort((a,b)=>b.ts-a.ts);
 
-  let html=`<div class="main-header">
-    <div>
-      <div class="main-title">${activeSubject}</div>
-      <div class="main-subtitle">${subjectNotes.length} not</div>
-    </div>
-    <button class="btn-add" onclick="openModal()">+ Not Ekle</button>
-  </div>`;
+  const title=searchQ?`"${searchQ}" için sonuçlar`:activeSubject;
+  const sub=`${list.length} not`;
 
-  if(subjectNotes.length===0){
-    html+=`<div class="empty">
-      <div class="empty-icon">📄</div>
-      <p>Bu ders için henüz not eklenmemiş.<br>İlk notu sen ekle!</p>
-    </div>`;
+  let h=`<div class="mhead"><div><div class="mtitle">${esc(title)}</div><div class="msub">${sub}</div></div>
+    <button class="hbtn accent" onclick="openNoteModal()">+ Not Ekle</button></div>`;
+
+  if(!list.length){
+    h+=`<div class="empty"><div class="empty-ico">📄</div><p>${searchQ?"Sonuç bulunamadı.":"Bu ders için henüz not yok.<br>İlk notu sen ekle!"}</p></div>`;
   } else {
-    html+=`<div class="notes-grid">`;
-    subjectNotes.forEach(n=>{
-      const d=new Date(n.ts);
-      const date=`${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;
-      const time=`${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
-      html+=`<div class="note-card">
-        <div class="note-top">
-          <div class="note-title">${esc(n.title)}</div>
-          <button class="note-del" onclick="deleteNote('${n.id}')">sil</button>
+    h+=`<div class="notes-list${searchQ?" search-results":""}>`;
+    list.forEach(n=>{
+      const d=fmtDate(n.ts);
+      const likes=n.likes||[];
+      const cmts=(n.comments||[]).length;
+      const liked=likes.includes(currentUser);
+      const subjectTag=searchQ?`<span class="nc-tag">${esc(n.subject)}</span>`:"";
+      h+=`<div class="note-card" onclick="openDetail('${n.id}')">
+        <div class="nc-top"><div class="nc-title">${esc(n.title)}</div>${subjectTag}</div>
+        <div class="nc-meta"><b>${esc(n.author)}</b><span>${d}</span></div>
+        <div class="nc-preview">${esc(n.body)}</div>
+        <div class="nc-foot">
+          <button class="foot-btn${liked?" liked":""}" onclick="event.stopPropagation();toggleLike('${n.id}')">♥ ${likes.length}</button>
+          <button class="foot-btn" onclick="event.stopPropagation();openDetail('${n.id}')">💬 ${cmts}</button>
+          ${n.image?`<span class="img-badge">📷 Görsel</span>`:""}
         </div>
-        <div class="note-meta">
-          <b>${esc(n.author)}</b>
-          <span>${date} · ${time}</span>
-        </div>
-        <div class="note-body">${esc(n.body)}</div>
       </div>`;
     });
-    html+=`</div>`;
+    h+=`</div>`;
   }
-  el.innerHTML=html;
+  el.innerHTML=h;
 }
 
-function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+/* ── EXAMS VIEW ── */
+function renderExams(){
+  const el=document.getElementById("main");
+  const today=new Date();today.setHours(0,0,0,0);
+  const sorted=[...exams].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const upcoming=sorted.filter(e=>new Date(e.date)>=today);
+  const past=sorted.filter(e=>new Date(e.date)<today);
 
-function openModal(){
+  let h=`<div class="mhead"><div><div class="mtitle">📅 Sınavlar</div><div class="msub">${upcoming.length} yaklaşan</div></div>
+    <button class="hbtn accent" onclick="openExamModal()">+ Sınav Ekle</button></div>`;
+
+  if(!exams.length){h+=`<div class="empty"><div class="empty-ico">📅</div><p>Henüz sınav eklenmemiş.</p></div>`;}
+  else {
+    if(upcoming.length){h+=`<div style="font-size:11px;color:var(--faint);font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.75rem">Yaklaşan</div><div class="event-grid">`;
+      upcoming.forEach(e=>{h+=examCard(e,today,false);});
+      h+=`</div>`;}
+    if(past.length){h+=`<div style="font-size:11px;color:var(--faint);font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin:1.5rem 0 .75rem">Geçmiş</div><div class="event-grid">`;
+      past.forEach(e=>{h+=examCard(e,today,true);});
+      h+=`</div>`;}
+  }
+  el.innerHTML=h;
+}
+
+function examCard(e,today,past){
+  const d=new Date(e.date);
+  const diff=Math.round((d-today)/(1000*60*60*24));
+  const countdown=past?`Geçti`:(diff===0?"Bugün!":diff===1?"Yarın":`${diff} gün`);
+  const cntClass=past?"cnt-late":diff<=3?"cnt-late":"cnt-exam";
+  return `<div class="event-card exam-card${past?" event-past":""}">
+    <div><div class="event-type exam-t">📅 SINAV</div>
+      <div class="event-desc">${esc(e.subject)} — ${esc(e.desc)}</div>
+      <div class="event-date">${fmtDay(e.date)} · ${esc(e.addedBy)}</div></div>
+    <div class="event-right">
+      <div class="event-countdown ${cntClass}">${countdown}</div>
+      <button class="event-del" onclick="delExam('${e.id}')">sil</button>
+    </div>
+  </div>`;
+}
+
+/* ── HOMEWORK VIEW ── */
+function renderHomeworks(){
+  const el=document.getElementById("main");
+  const today=new Date();today.setHours(0,0,0,0);
+  const sorted=[...homeworks].sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+  let filtered=sorted;
+  if(hwFilter==="pending")filtered=sorted.filter(h=>!h.doneBy?.includes(currentUser)&&new Date(h.date)>=today);
+  if(hwFilter==="done")filtered=sorted.filter(h=>h.doneBy?.includes(currentUser));
+  if(hwFilter==="late")filtered=sorted.filter(h=>new Date(h.date)<today&&!h.doneBy?.includes(currentUser));
+
+  const pendingCnt=sorted.filter(h=>!h.doneBy?.includes(currentUser)&&new Date(h.date)>=today).length;
+
+  let h=`<div class="mhead"><div><div class="mtitle">📝 Ödevler</div><div class="msub">${pendingCnt} bekleyen ödev</div></div>
+    <button class="hbtn accent" onclick="openHwModal()">+ Ödev Ekle</button></div>`;
+
+  h+=`<div class="section-filter">
+    <div class="filter-pill${hwFilter==="all"?" active":""}" onclick="setHwFilter('all')">Tümü</div>
+    <div class="filter-pill${hwFilter==="pending"?" active":""}" onclick="setHwFilter('pending')">Bekleyen</div>
+    <div class="filter-pill${hwFilter==="done"?" active":""}" onclick="setHwFilter('done')">Tamamladım</div>
+    <div class="filter-pill${hwFilter==="late"?" active":""}" onclick="setHwFilter('late')">Gecikmiş</div>
+  </div>`;
+
+  if(!filtered.length){h+=`<div class="empty"><div class="empty-ico">✅</div><p>Burada gösterilecek ödev yok.</p></div>`;}
+  else{
+    h+=`<div class="event-grid">`;
+    filtered.forEach(hw=>{
+      const d=new Date(hw.date);
+      const diff=Math.round((d-today)/(1000*60*60*24));
+      const done=(hw.doneBy||[]).includes(currentUser);
+      const past=d<today;
+      const countdown=past?"Gecikti!":(diff===0?"Bugün son gün!":diff===1?"Yarın son gün":`${diff} gün kaldı`);
+      const cntClass=past||diff<=1?"cnt-late":"cnt-hw";
+      const doneCount=(hw.doneBy||[]).length;
+      h+=`<div class="event-card hw-card${past&&!done?" event-past":""}">
+        <div style="flex:1">
+          <div class="event-type hw-t">📝 ÖDEV · ${esc(hw.subject)}</div>
+          <div class="event-desc">${esc(hw.title)}</div>
+          ${hw.desc?`<div style="font-size:13px;color:var(--muted);margin-top:3px">${esc(hw.desc)}</div>`:""}
+          <div class="event-date">Son: ${fmtDay(hw.date)} · ${esc(hw.addedBy)} · ${doneCount} kişi tamamladı</div>
+        </div>
+        <div class="event-right">
+          <div class="event-countdown ${cntClass}">${done?"✅ Tamam":countdown}</div>
+          <button class="hw-done${done?" done-yes":""}" onclick="toggleHwDone('${hw.id}')">${done?"Tamamlandı":"Tamamla"}</button>
+          <button class="event-del" onclick="delHw('${hw.id}')">sil</button>
+        </div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  el.innerHTML=h;
+}
+
+function setHwFilter(f){hwFilter=f;renderHomeworks();}
+
+/* ── NOTE DETAIL ── */
+function openDetail(id){
+  const n=notes.find(x=>x.id===id);
+  if(!n)return;
+  const likes=n.likes||[];
+  const liked=likes.includes(currentUser);
+  const cmts=n.comments||[];
+  const dc=document.getElementById("det-content");
+  dc.innerHTML=`
+    <div class="det-subject">${esc(n.subject)}</div>
+    <div class="det-title">${esc(n.title)}</div>
+    <div class="det-meta"><b>${esc(n.author)}</b><span>${fmtDate(n.ts)}</span><span>♥ ${likes.length}</span></div>
+    ${n.image?`<img class="det-img" src="${n.image}">`:""}
+    <div class="det-body">${esc(n.body)}</div>`;
+  document.getElementById("det-actions").innerHTML=`
+    <button class="dact${liked?" liked":""}" onclick="toggleLike('${id}');openDetail('${id}')">♥ ${likes.length} Beğen</button>
+    <button class="dact" onclick="exportPDF('${id}')">⬇ PDF İndir</button>
+    ${n.author===currentUser?`<button class="dact del-act" onclick="delNote('${id}')">🗑 Sil</button>`:""}`;
+  document.getElementById("det-comments").innerHTML=renderComments(n,id);
+  document.getElementById("det-actions").style.display="flex";
+  openModal("detail-overlay");
+}
+
+function renderComments(n,id){
+  const cmts=n.comments||[];
+  let h=`<div class="cmt-title">Yorumlar (${cmts.length})</div>`;
+  cmts.forEach(c=>{
+    h+=`<div class="cmt"><div class="cmt-author">${esc(c.author)}<span class="cmt-time">${fmtDate(c.ts)}</span></div><div class="cmt-body">${esc(c.body)}</div></div>`;
+  });
+  h+=`<div class="cmt-form"><input id="cmt-inp" placeholder="Yorum yaz..." onkeydown="if(event.key==='Enter')addComment('${id}')"><button class="btn-ok" style="padding:.42rem .9rem;font-size:13px" onclick="addComment('${id}')">Gönder</button></div>`;
+  return h;
+}
+
+async function addComment(id){
+  const inp=document.getElementById("cmt-inp");
+  const body=inp.value.trim();
+  if(!body)return;
+  const n=notes.find(x=>x.id===id);
+  if(!n)return;
+  if(!n.comments)n.comments=[];
+  n.comments.push({id:uid(),author:currentUser,body,ts:Date.now()});
+  await ss("notes",notes);
+  openDetail(id);
+}
+
+/* ── LIKES ── */
+async function toggleLike(id){
+  const n=notes.find(x=>x.id===id);
+  if(!n)return;
+  if(!n.likes)n.likes=[];
+  const i=n.likes.indexOf(currentUser);
+  if(i>-1)n.likes.splice(i,1);else n.likes.push(currentUser);
+  await ss("notes",notes);
+  render();
+}
+
+/* ── NOTE MODAL ── */
+function openNoteModal(){
   const sel=document.getElementById("f-subject");
   sel.innerHTML=SUBJECTS.map(s=>`<option value="${s}"${s===activeSubject?" selected":""}>${s}</option>`).join("");
-  document.getElementById("overlay").classList.add("open");
-  document.getElementById("f-title").focus();
-}
-
-function closeModal(){
-  document.getElementById("overlay").classList.remove("open");
-}
-
-function saveNote(){
-  const subject=document.getElementById("f-subject").value;
-  const title=document.getElementById("f-title").value.trim();
-  const author=document.getElementById("f-author").value.trim();
-  const body=document.getElementById("f-body").value.trim();
-
-  if(!title){alert("Lütfen bir başlık gir.");return;}
-  if(!author){alert("Lütfen isminizi gir.");return;}
-  if(!body){alert("Lütfen not içeriği yaz.");return;}
-
-  const note={id:Date.now()+"_"+Math.random().toString(36).slice(2),subject,title,author,body,ts:Date.now()};
-  notes.push(note);
-  saveNotes();
-  activeSubject=subject;
-
+  pendingImg=null;
   document.getElementById("f-title").value="";
   document.getElementById("f-body").value="";
-  closeModal();
-  render();
+  document.getElementById("img-thumb").style.display="none";
+  document.getElementById("img-rm").style.display="none";
+  document.getElementById("img-zone").style.display="block";
+  openModal("note-overlay");
+  setTimeout(()=>document.getElementById("f-title").focus(),100);
 }
 
-function deleteNote(id){
+function closeNoteModal(){closeModal("note-overlay");}
+
+async function saveNote(){
+  const subject=document.getElementById("f-subject").value;
+  const title=document.getElementById("f-title").value.trim();
+  const body=document.getElementById("f-body").value.trim();
+  if(!title){alert("Başlık gir.");return;}
+  if(!body){alert("İçerik yaz.");return;}
+  const note={id:uid(),subject,title,author:currentUser,body,ts:Date.now(),likes:[],comments:[],image:pendingImg||null};
+  notes.push(note);
+  await ss("notes",notes);
+  activeSubject=subject;activeView="notes";
+  closeNoteModal();render();
+}
+
+async function delNote(id){
   if(!confirm("Bu notu silmek istediğinden emin misin?"))return;
   notes=notes.filter(n=>n.id!==id);
-  saveNotes();
+  await ss("notes",notes);
+  closeModal("detail-overlay");render();
+}
+
+/* ── IMAGE ── */
+function handleImg(inp){
+  const file=inp.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    pendingImg=e.target.result;
+    document.getElementById("img-thumb").src=pendingImg;
+    document.getElementById("img-thumb").style.display="block";
+    document.getElementById("img-rm").style.display="block";
+    document.getElementById("img-zone").style.display="none";
+  };
+  reader.readAsDataURL(file);
+}
+
+function rmImg(){
+  pendingImg=null;
+  document.getElementById("img-thumb").style.display="none";
+  document.getElementById("img-rm").style.display="none";
+  document.getElementById("img-zone").style.display="block";
+  document.getElementById("img-inp").value="";
+}
+
+/* ── EXAM ── */
+function openExamModal(){
+  document.getElementById("ef-subject").innerHTML=SUBJECTS.map(s=>`<option>${s}</option>`).join("");
+  document.getElementById("ef-desc").value="";
+  document.getElementById("ef-date").value="";
+  openModal("exam-overlay");
+}
+
+async function saveExam(){
+  const subject=document.getElementById("ef-subject").value;
+  const desc=document.getElementById("ef-desc").value.trim();
+  const date=document.getElementById("ef-date").value;
+  if(!desc){alert("Açıklama gir.");return;}
+  if(!date){alert("Tarih seç.");return;}
+  exams.push({id:uid(),subject,desc,date,addedBy:currentUser});
+  await ss("exams",exams);
+  closeModal("exam-overlay");render();
+}
+
+async function delExam(id){
+  if(!confirm("Sınav silinsin mi?"))return;
+  exams=exams.filter(e=>e.id!==id);
+  await ss("exams",exams);renderExams();
+}
+
+/* ── HOMEWORK ── */
+function openHwModal(){
+  document.getElementById("hf-subject").innerHTML=SUBJECTS.map(s=>`<option>${s}</option>`).join("");
+  document.getElementById("hf-title").value="";
+  document.getElementById("hf-desc").value="";
+  document.getElementById("hf-date").value="";
+  openModal("hw-overlay");
+}
+
+async function saveHw(){
+  const subject=document.getElementById("hf-subject").value;
+  const title=document.getElementById("hf-title").value.trim();
+  const desc=document.getElementById("hf-desc").value.trim();
+  const date=document.getElementById("hf-date").value;
+  if(!title){alert("Başlık gir.");return;}
+  if(!date){alert("Tarih seç.");return;}
+  homeworks.push({id:uid(),subject,title,desc,date,addedBy:currentUser,doneBy:[]});
+  await ss("homeworks",homeworks);
+  closeModal("hw-overlay");renderHomeworks();
+}
+
+async function toggleHwDone(id){
+  const hw=homeworks.find(h=>h.id===id);
+  if(!hw)return;
+  if(!hw.doneBy)hw.doneBy=[];
+  const i=hw.doneBy.indexOf(currentUser);
+  if(i>-1)hw.doneBy.splice(i,1);else hw.doneBy.push(currentUser);
+  await ss("homeworks",homeworks);renderHomeworks();
+}
+
+async function delHw(id){
+  if(!confirm("Ödev silinsin mi?"))return;
+  homeworks=homeworks.filter(h=>h.id!==id);
+  await ss("homeworks",homeworks);renderHomeworks();
+}
+
+/* ── SEARCH ── */
+function doSearch(q){
+  searchQ=q.toLowerCase();
+  if(searchQ)activeView="notes";
   render();
 }
 
-document.getElementById("overlay").addEventListener("click",function(e){
-  if(e.target===this)closeModal();
+/* ── PDF ── */
+function exportPDF(id){
+  const n=notes.find(x=>x.id===id);
+  if(!n)return;
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF();
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(16);
+    doc.text(n.title,14,20);
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text(`${n.subject} | ${n.author} | ${fmtDate(n.ts)}`,14,28);
+    doc.setTextColor(40);
+    doc.setFontSize(12);
+    const lines=doc.splitTextToSize(n.body,182);
+    doc.text(lines,14,38);
+    doc.save(`${n.title.replace(/\s+/g,"_")}.pdf`);
+  }catch(e){alert("PDF oluşturulurken hata oluştu.");}
+}
+
+/* ── DARK MODE ── */
+function toggleDark(){
+  document.body.classList.toggle("dark");
+  localStorage.setItem("dm",document.body.classList.contains("dark")?"1":"0");
+  updateThemeBtn();
+}
+function updateThemeBtn(){
+  const btn=document.getElementById("theme-btn");
+  if(btn)btn.textContent=document.body.classList.contains("dark")?"☀️":"🌙";
+}
+
+/* ── MODAL ── */
+function openModal(id){document.getElementById(id).classList.add("open");}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+function closeDetail(){closeModal("detail-overlay");}
+
+document.querySelectorAll(".overlay").forEach(o=>{
+  o.addEventListener("click",function(e){if(e.target===this)this.classList.remove("open");});
 });
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".overlay.open").forEach(o=>o.classList.remove("open"));});
 
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+/* ── HELPERS ── */
+function uid(){return Date.now()+"_"+Math.random().toString(36).slice(2);}
+function esc(s){if(!s)return "";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function fmtDate(ts){const d=new Date(ts);return `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;}
+function fmtDay(dateStr){const d=new Date(dateStr);return `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;}
 
-loadNotes();
+init();
 </script>
 </body>
 </html>
